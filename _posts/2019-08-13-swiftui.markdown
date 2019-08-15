@@ -1,0 +1,27 @@
+---
+layout: post
+title: On Change
+excerpt_separator:  <!--more-->
+---
+
+I'm not sure if there's a domain quite so fluid in its nature and changing in its opinions as software development.
+
+I've been working as a professional software engineer since 2006 when I left university with a degree in French and did an immediate 180 degree turn towards my true passion.
+
+Since that time I've gone from building Web apps using (`HTML, CSS and JavaScript`) to Windows apps (`WinForms, WPF, Silverlight, WinRT`), back to Web (`ASP.NET WebForms, ASP.NET MVC`) to Mobile (`iOS, Android, Windows Phone, BlackBerry and Nokia S40`) to a subset (`iOS, Android`) and currently to Apple tech (`iOS, watchOS, iPadOS`).
+
+Every platform has its own UI and UX patterns and paradigms, think of how there used to be a button for everything on Windows vs reduced, simple choices on iPhone. Even interaction models (touch vs keyboard + mouse), animations, sounds, colour schemes all vary.
+
+Then there are the languages you build these apps in, that are highly opinionated. Strongly typed or dynamically typed? Procedural or Functional?
+Naming convention differences abound too, is that a `btnBuyNow` or a `BuyNowButton`?
+Syntax differences `[NSString stringWithFormat: @"Hello %@", @"Dave"]` vs `"Hello \(name)"`.
+
+There are languages and platforms where design patterns are cooked in to the standard libraries, like Java where you'll find patterns like `Factory`, `Builder`, `Singleton`, `Adapter`, `Iterator`, `Observer` and others where if you want structure then you'll have to create it yourself.
+
+Now I know there are people whose choices of technology have remained more or less static but my experience over the years suggests that change is the norm.
+Whether it be fundamental platform changes, language changes, UI/UX changes, attitudinal changes or whatever it may be, change is the universal constant.
+
+On Apple platforms I love Swift, I love how Apple fundamentally shifted from Skeuomorphic design to flat, metro, material design, I love how the iPad moved from 'just a big iPhone' to the only device some people need to work. I love how at WWDC 2019 Apple announced a completely new UI engine based on reactive programming principles, I love how they ship software regularly and fix mistakes.
+
+There may come a time when I think differently but today, today **I love change**, today I love working with Apple platforms and long may the industry continue.
+
