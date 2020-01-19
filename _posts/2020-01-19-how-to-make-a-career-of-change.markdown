@@ -16,13 +16,15 @@ I've gone from building Web apps using `(HTML, CSS and JavaScript)` to Windows a
 ### Design and Usability
 Every platform has its own UI and UX patterns and paradigms and even these change significantly over time.
 For example, iOS was introduced using a Skeuomorphic user interface, a design-language based on the physical world, using brushed steel, wood panelling, paper and buttons that replicated objects in the real world that users already knew how to interact with. Later, Windows Phone introduced Metro, a minimal 'flat' design language that focused on typography and iconography and presented a more abstract, geometric, futuristic UI.
-As users have become more used to interacting with their devices, all the major platforms have moved towards 'flat' design but each with a slightly different focus and design vocabulary. 
+
+As users have become more used to interacting with their devices all the major platforms have moved towards 'flat' design but each with a slightly different focus and design vocabulary.
 
 Beyond the platforms, the popularity of programming languages has changed significantly, hundreds of thousands of apps are written in languages that **didn't even exist** a decade ago.
 
 ### Ways of working
 The methodologies behind how we work have transitioned too, from Waterfall with longer cycle times and big design up-front to more Agile approaches that allow more iterative, rapid development and release cycles.
-When I first started, we'd gather requirements, design a solution, develop it and finally, months-later release it to the client for user acceptance testing. With some of the agile approaches, you may only work a day, week or biweekly sprint and work on a small piece of the whole problem space, iterating over it with the client and delivering a vertical slice of the final product in a short amount of time.
+
+When I first started, we'd gather requirements, design a solution, develop it and months-later finally release it to the client for user acceptance testing before changes could be made or interpretation issues found. With some of the agile approaches, you may only work in daily, weekly or monthly sprints and work on a small piece of the whole problem space at a time, iterating over it with the client and delivering a slice of the final product in a short amount of time. Agile practices can enable engaged clients to course-correct earlier, saving time, effort and money.
 
 ### What am I getting at?
 Change **is** inevitable, it can be quick, it can be radical and it can be tough to adapt to.
