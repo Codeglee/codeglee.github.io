@@ -38,7 +38,8 @@ This has been the most beneficial for my personal growth. What can you learn, ho
 This was definitely the case for me, I rode the mobile wave from the very first developer-accessible versions of iOS, Android and Windows Phone. I built applications for MTV, Samsung, Nissan and worked closely with the developer evangelists at Google and Microsoft to optimise performance and learn how to deliver great user experiences. That leap from Web and Windows to Mobile has resulted in the most successful decade of my career so far.
 
 ### **Focus on fundamentals**.
-Despite the shift towards more functional, reactive languages and approaches, focusing on the basics, sound engineering principles and design patterns have been critical for me. 
+Despite the shift towards more functional, reactive languages and approaches, focusing on the basics, sound engineering principles and design patterns have been critical for me. The ability to refactor code for quality, testability, to remove duplication or to simplify intent never goes out of style.
+
 Knowing the design patterns meant that Android where they are cooked into the standard libraries made the transition much easier. You'll find patterns like `Factory, Builder, Singleton, Adapter, Iterator and Observer` among others across both Android and iOS.
 
 ### **Be passionate.**
