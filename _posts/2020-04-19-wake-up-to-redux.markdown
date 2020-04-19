@@ -1,3 +1,8 @@
+---
+layout: post
+title: Wake up to Redux - a state management pattern
+excerpt_separator:  <!--more-->
+---
 
 #Wake up to Redux - a state management pattern
 
