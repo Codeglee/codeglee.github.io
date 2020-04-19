@@ -4,9 +4,9 @@ title: Wake up to Redux - a state management pattern
 excerpt_separator:  <!--more-->
 ---
 
-#Wake up to Redux - a state management pattern
+# Wake up to Redux - a state management pattern
 
-####Take a breath
+#### Take a breath
 I'm about to tell you a dark tale. A story not so far from reality in a lot of codebases, as one might like to think.
 
 Picture if you will, a core team building out an application over several years starting with a prototype, small in scope and with a well-defined architecture.
@@ -18,7 +18,7 @@ Not only that, the underlying data that drives the app is becoming more complex 
 
 The app is no longer predictable, unexpected state bugs manifest seemingly at random, inspecting the current state is nigh on impossible and debugging issues is mind-boggling. Then come the race conditions, multiple places wrestling each other, trying to update the data at the same time. You can barely see straight, sleep escapes you, you don't know where you are anymore.
 
-####It's okay, mop your brow, it was just a nightmare
+#### It's okay, mop your brow, it was just a nightmare
 You're safe and among friends, this is but a cautionary tale to tell you about **Redux**, a state management pattern that can help alleviate and entirely avoid these kinds of horrors.
 
 Thankfully the mobile teams I've worked with haven't had issues quite this extreme to deal with but you should always open to potential code and quality improvements.
@@ -287,7 +287,7 @@ You can make it more reactive than that, but essentially that's it end to end.
 
 ---
 
-###Conclusion
+### Conclusion
 Hopefully, you can see the value such an approach might have.:
 - Our `State` is consistent, predictable and (functionally) immutable.
 - Every part is easily tested from the `Store` through the `Reducers` and `Middleware` without creating Mocks (*cough* except thread dispatchers).
