@@ -4,8 +4,6 @@ title: Wake up to Redux - a state management pattern
 excerpt_separator:  <!--more-->
 ---
 
-# Wake up to Redux - a state management pattern
-
 #### Take a breath
 I'm about to tell you a dark tale. A story not so far from reality in a lot of codebases, as one might like to think.
 
