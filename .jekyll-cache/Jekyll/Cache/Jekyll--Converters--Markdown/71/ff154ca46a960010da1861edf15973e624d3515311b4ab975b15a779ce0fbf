@@ -1,0 +1,60 @@
+I",<p>A decade is a significant enough period of time to see some real change in the world; the start of a new decade is therefore the perfect time for reflection.</p>
+
+<p>Putting aside my imposter syndrome for a moment, I have to recognise that I’ve been a professional software developer since 2006. I left university with a degree in French and did an immediate 180 degree turn towards my continuing passion for programming.</p>
+
+<p>I’m not sure if there’s a domain quite so fluid in its nature and changing in its opinions as software development but I feel very grateful to be a part of it.</p>
+
+<h3 id="technologies"><strong>Technologies</strong></h3>
+<p>I’ve gone from building Web apps using <code class="language-plaintext highlighter-rouge">(HTML, CSS and JavaScript)</code> to Windows apps using <code class="language-plaintext highlighter-rouge">(WinForms, WPF, Silverlight and WinRT)</code>, back to Web <code class="language-plaintext highlighter-rouge">(ASP.NET WebForms, ASP.NET MVC)</code> to Mobile <code class="language-plaintext highlighter-rouge">(iOS, Android, Windows Phone, BlackBerry and Nokia S40)</code> to a subset <code class="language-plaintext highlighter-rouge">(iOS, Android)</code> and am currently focusing on Apple <code class="language-plaintext highlighter-rouge">(iOS, watchOS, iPadOS)</code> platforms.</p>
+
+<h3 id="design-and-usability">Design and Usability</h3>
+<p>Every platform has its own UI and UX patterns and paradigms and even these change significantly over time.
+For example, iOS was introduced using a Skeuomorphic user interface, a design-language based on the physical world, using brushed steel, wood panelling, paper and buttons that replicated objects in the real world that users already knew how to interact with. Later, Windows Phone introduced Metro, a minimal ‘flat’ design language that focused on typography and iconography and presented a more abstract, geometric, futuristic UI.</p>
+
+<p>As users have become more used to interacting with their devices all the major platforms have moved towards ‘flat’ design but each with a slightly different focus and design vocabulary.</p>
+
+<p>Beyond the platforms, the popularity of programming languages has changed significantly, hundreds of thousands of apps are written in languages that <strong>didn’t even exist</strong> a decade ago.</p>
+
+<h3 id="ways-of-working">Ways of working</h3>
+<p>The methodologies behind how we work have transitioned too, from Waterfall with longer cycle times and big design up-front to more Agile approaches that allow more iterative, rapid development and release cycles.</p>
+
+<p>When I first started, we’d gather requirements, design a solution, develop it and months-later finally release it to the client for user acceptance testing before changes could be made or interpretation issues found. With some of the agile approaches, you may only work in daily, weekly or monthly sprints and work on a small piece of the whole problem space at a time, iterating over it with the client and delivering a slice of the final product in a short amount of time. Agile practices can enable engaged clients to course-correct earlier, saving time, effort and money.</p>
+
+<h3 id="what-am-i-getting-at">What am I getting at?</h3>
+<p>Change <strong>is</strong> inevitable, it can be quick, it can be radical and it can be tough to adapt to.</p>
+
+<h2 id="so-what-can-you-do">So what can you do?</h2>
+
+<h3 id="be-open-to-change"><strong>Be open to change.</strong></h3>
+
+<p>This has been the most beneficial for my personal growth. What can you learn, how can you grow from it? Look for the value proposition inherent in any change. Not every change will be for you, not every change applies to every problem space, domain or platform but being aware of the terrain changing around you will reduce the shock and you may be able to get ahead of the curve.</p>
+
+<p>This was definitely the case for me, I rode the mobile wave from the very first developer-accessible versions of iOS, Android and Windows Phone. I built applications for MTV, Samsung, Nissan and worked closely with the developer evangelists at Google and Microsoft to optimise performance and learn how to deliver great user experiences. That leap from Web and Windows to Mobile has resulted in the most successful decade of my career so far.</p>
+
+<h3 id="focus-on-fundamentals"><strong>Focus on fundamentals</strong>.</h3>
+<p>Despite the shift towards more functional, reactive languages and approaches, focusing on the basics, sound engineering principles and design patterns have been critical for me. The ability to refactor code for quality, testability, to remove duplication or to simplify intent never goes out of style.</p>
+
+<p>Knowing the design patterns meant that Android where they are cooked into the standard libraries made the transition much easier. You’ll find patterns like <code class="language-plaintext highlighter-rouge">Factory, Builder, Singleton, Adapter, Iterator and Observer</code> among others across both Android and iOS.</p>
+
+<h3 id="be-passionate"><strong>Be passionate.</strong></h3>
+
+<p><strong>I love JavaScript and TypeScript</strong>, it was my gateway drug into the industry, it’s full of the best and worst of programming and opened my eyes to the incredible possibility of code.</p>
+
+<p><strong>I love C#</strong>, it exposed me to LINQ, databases, functional programming and building systems at scale. It enabled me to write for the Web, Windows, Phone and Xbox.</p>
+
+<p><strong>I love Android, Java, and Kotlin</strong> which cemented my design pattern knowledge and gave me some opportunities for incredible refactoring and code quality improvements.</p>
+
+<p><strong>I love iOS, Objective-C and Swift</strong> which taught me so much about design and user experience. In recent years I’ve learned and used so many different architectures MVC, MVP, MVVM+C and VIPER.</p>
+
+<p><strong>I love UI and UX</strong>, there’s so much joy to be had in delivering a product that looks great, can be used instinctively and that results in more efficient, comfortable and accessible functionality.</p>
+
+<p><strong>I love that I don’t know what I’ll be passionate about in the future</strong></p>
+
+<h3 id="fail-frequently"><strong>Fail frequently.</strong></h3>
+<p>If you try to maintain an iron-clad bubble of control, never trying anything new, never changing your ways of working, never risking the chance of failure then you’ll never grow and the chances are high that you’ll be left behind when the winds change.</p>
+
+<h3 id="be-the-change">Be the change.</h3>
+<p>There may come a time when I think differently or that I get lost along the way but today, today <strong>I love change</strong>, I love nothing more than seeing something new, spinning up a new project and having a play with it. Learning and failing and trying again is my recipe for growth.</p>
+
+<p>You don’t have to jump at every shiny new thing, you don’t have to open source every project, you don’t have to shout about your successes or failures. But know this, change is the universal constant and, in my opinion, the best way to navigate a career is to change along with it.</p>
+:ET
