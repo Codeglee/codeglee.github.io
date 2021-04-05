@@ -22,6 +22,7 @@ gem "jekyll-theme-hydeout", "~> 3.4"
 group :jekyll_plugins do
   gem "jekyll-feed", "~> 0.6"
   gem "jekyll-remote-theme"
+  gem "jekyll-sitemap"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
