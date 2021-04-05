@@ -1,0 +1,304 @@
+I"FE<h4 id="take-a-breath">Take a breath</h4>
+<p>I’m about to tell you a dark tale. A story not so far from reality in a lot of codebases, as one might like to think.</p>
+
+<p>Picture if you will, a core team building out an application over several years starting with a prototype, small in scope and with a well-defined architecture.</p>
+
+<p>Over time it evolves as requirements and features change, different team members come and go, different philosophies, patterns and architectures are applied. In the dark recesses of the codebase, tech debt increases.</p>
+
+<p>In time, the app reaches a point of sufficient size and complexity that no one person can keep the whole of the app in their head.
+Not only that, the underlying data that drives the app is becoming more complex and mysterious with any manner of asynchronous or background processes mutating the data at any time.</p>
+
+<p>The app is no longer predictable, unexpected state bugs manifest seemingly at random, inspecting the current state is nigh on impossible and debugging issues is mind-boggling. Then come the race conditions, multiple places wrestling each other, trying to update the data at the same time. You can barely see straight, sleep escapes you, you don’t know where you are anymore.</p>
+
+<h4 id="its-okay-mop-your-brow-it-was-just-a-nightmare">It’s okay, mop your brow, it was just a nightmare</h4>
+<p>You’re safe and among friends, this is but a cautionary tale to tell you about <strong>Redux</strong>, a state management pattern that can help alleviate and entirely avoid these kinds of horrors.</p>
+
+<p>Thankfully the mobile teams I’ve worked with haven’t had issues quite this extreme to deal with but you should always open to potential code and quality improvements.</p>
+
+<p>So, if you have no idea who, why or what is changing your data from one moment to the next, struggle with race conditions or order of operation bugs or find it hard to debug or inspect the state of your app, read on.</p>
+
+<p>Still here? great, let’s dig into the central tenets of Redux:</p>
+
+<p><strong>Single source of truth</strong></p>
+
+<ul>
+  <li>The state of the app is stored in an object tree with a single point of access.</li>
+</ul>
+
+<p><strong>State is read only</strong></p>
+
+<ul>
+  <li>State can only be changed by dispatching <code class="language-plaintext highlighter-rouge">Actions</code>
+    <ul>
+      <li>Actions encapsulate the intent to transform the state</li>
+    </ul>
+  </li>
+  <li>All changes are made synchronously, applied one-by-one in a strict order
+    <ul>
+      <li>This results in no race conditions</li>
+    </ul>
+  </li>
+  <li>Actions are simple objects and can be logged, serialised and easily tested</li>
+</ul>
+
+<p><strong>State is transformed by using pure functions</strong></p>
+<ul>
+  <li>Reducers are pure functions that take a previous state, an action to be applied and return the next state.</li>
+  <li>Reducers are called in order and can be split into smaller reducers dealing with specific state</li>
+  <li>Pure functions are super testable, pass an action, get a state back. Is it the expected state? Great! No need for mocks.</li>
+</ul>
+
+<p>Three strong principles that hopefully you can already see the glimmer of utility in. It’s worth calling out that although these are the <em>intended</em> pillars and will serve you well, there’s a lot of <a href="https://blog.isquaredsoftware.com/2017/05/idiomatic-redux-tao-of-redux-part-1/">nuance</a> to how you might go about using it.</p>
+
+<p>Principles aside, Redux consists of a few different parts.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Store</code>
+    <ul>
+      <li>Holds the <code class="language-plaintext highlighter-rouge">State</code></li>
+      <li>Dispatches Actions</li>
+      <li>Applies reducers to actions and exclusivey updates the state</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">Reducer</code>
+    <ul>
+      <li>A pure function taking the current <code class="language-plaintext highlighter-rouge">State</code>, an <code class="language-plaintext highlighter-rouge">Action</code> and returns an updated <code class="language-plaintext highlighter-rouge">State</code></li>
+      <li>If a specific <code class="language-plaintext highlighter-rouge">Reducer</code> doesn’t handle the <code class="language-plaintext highlighter-rouge">Action</code> then it may return <code class="language-plaintext highlighter-rouge">State</code> unchanged.</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">Actions</code>
+    <ul>
+      <li>Primitive objects that contain the intended change and nothing more</li>
+      <li>Keep free of reference types</li>
+    </ul>
+  </li>
+</ul>
+
+<p>There are optional components that can be added that I’ll try and cover later. <code class="language-plaintext highlighter-rouge">Middleware</code> + <code class="language-plaintext highlighter-rouge">ActionCreators</code> both enable asynchronous actions.</p>
+
+<p>In <code class="language-plaintext highlighter-rouge">Swift</code> this could look something like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>final class Store {
+    private let reducer: Reducer
+    private let serialDispatcher: DispatchQueueing
+    private let mainThreadDispatcher: Dispatching
+    private(set) var state: State
+
+    init(
+        state: State,
+        reducers: [Reducer],
+        serialDispatcher: DispatchQueueing,
+        mainThreadDispatcher: Dispatching
+        ) {
+            self.serialDispatcher = serialDispatcher
+            self.mainThreadDispatcher = mainThreadDispatcher
+
+            let combinedReducers: Reducer = { state, action in
+                return reducers.reduce(state) { $1($0, action) }
+            }
+            self.reducer = combinedReducers
+            self.state = state
+        }
+
+    func dispatch(action: ActionProtocol) {
+        serialDispatcher.enqueue { [weak self] in
+            guard let self = self else { return }
+            
+            let initialState = self.state
+            
+            self.state = self.reducer(initialState, action)
+        }
+    }
+}
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol ActionDispatching {
+    func dispatch(action: ActionProtocol)
+}
+
+protocol ActionProtocol {}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">typealias Reducer = (_ state: AppState, _ action: ActionProtocol) -&gt; AppState</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//NOTE: This could be implemented as an OperationQueue subclass with maxConcurrentOperationCount of 1
+protocol DispatchQueueing {
+    func enqueue(_ block: @escaping() -&gt; Void)
+}
+
+//NOTE: This could be a wrapped DispatchQueue
+protocol Dispatching {
+    func async(_ block: @escaping () -&gt; Void)
+}
+</code></pre></div></div>
+
+<p><strong>That’s it!</strong>
+With this solution you can safely dispatch an action without fear, you can fully test every aspect of state mutation.</p>
+
+<p><em>Except</em>… what about asynchronous actions? what about state change notifications?</p>
+
+<p><strong>Good questions! Give yourself a pat on the back!</strong>
+As with all programming problems there are any number of solutions.
+Let’s start with <strong>asynchrony</strong>. There are two approaches that seem to have traction, <code class="language-plaintext highlighter-rouge">Middleware</code> and <code class="language-plaintext highlighter-rouge">Action Creators</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Middleware</code> is called with an <code class="language-plaintext highlighter-rouge">Action</code> before the <code class="language-plaintext highlighter-rouge">State</code> has changed. <code class="language-plaintext highlighter-rouge">Middleware</code> is not allowed to mutate the state and <strong>cannot block execution</strong>, it’s basically just an opportunity to kick start async operations, potentially with callbacks or long-running task completion handlers.
+If <code class="language-plaintext highlighter-rouge">Middleware</code> wants to update the <code class="language-plaintext highlighter-rouge">State</code> it enqueues <code class="language-plaintext highlighter-rouge">Actions</code> via the <code class="language-plaintext highlighter-rouge">Store</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Action Creators</code>, sometimes called <code class="language-plaintext highlighter-rouge">Thunks</code> encapsulate a function, so rather than just being a plain old object containing data, it may act on that data too before dispatching an <code class="language-plaintext highlighter-rouge">Action</code> itself on completion.
+To avoid blocking, <code class="language-plaintext highlighter-rouge">Action Creators</code> can be performed via <code class="language-plaintext highlighter-rouge">Middleware</code>.</p>
+
+<p>Essentially both allow you to encapsulate asynchronous actions without blocking, in slightly different ways. Pick your poison.</p>
+
+<p>Let’s say you’re writing an app to sell <code class="language-plaintext highlighter-rouge">Widgets</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>struct State {
+    let widgets: [Widget]
+}
+
+struct Widget {
+    let id: Int
+    let name: String
+}
+</code></pre></div></div>
+
+<p>On your <code class="language-plaintext highlighter-rouge">WidgetListViewController</code> you want to let users <code class="language-plaintext highlighter-rouge">Refresh</code> the list of <code class="language-plaintext highlighter-rouge">Widgets</code> so you call <code class="language-plaintext highlighter-rouge">store.dispatch(RefreshWidgetsAction())</code>.</p>
+
+<p>Here’s how we define our middleware:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol Middleware {
+    func apply(state: State, action: Action)
+}
+</code></pre></div></div>
+
+<p>Our widget provider:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol WidgetProviding {
+    func provideWidgets(completion: () -&gt; [Widget])
+}
+</code></pre></div></div>
+
+<p>The middleware to perform async widget providing.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>final class WidgetProviderMiddleware: Middleware {
+    private let widgetProvider: WidgetProviding
+    private let backgroundDispatcher: Dispatching
+    private let actionDispatcher: ActionDispatching
+    private let requestFrequencyLimitInSeconds: TimeInterval
+    
+    private var widgetsLastProvided: Date = Date()
+
+    init(...)
+
+    func apply(state: State, action: Action) {
+        switch action {
+            case let action as RefreshWidgetsAction {
+                backgroundDispatcher.async { [weak self] in
+                    //NOTE: Naively limit requests to once every N seconds
+                    if Date() &gt; widgetsLastProvided.addingTimeInterval(requestFrequencyLimitInSeconds) {
+                    widgetProvider.provideWidgets { widgets in
+                        //NOTE: Async action completed, let's update the state
+                        actionDispatcher.dispatch(UpdateWidgetsAction(widgets: widgets))
+                        widgetsLastProvided = Date()
+                    }
+                }
+            }
+}
+</code></pre></div></div>
+
+<p>Now the <code class="language-plaintext highlighter-rouge">Reducer</code> to update the state:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func reduce(state: State, action: ActionProtocol) -&gt; State {
+    switch action {
+        case let action as UpdateWidgetsAction:
+            return State(widgets: action.widgets)
+        default: return state
+    }
+}
+</code></pre></div></div>
+
+<p>There we go, our <code class="language-plaintext highlighter-rouge">WidgetListViewController</code> can dispatch <code class="language-plaintext highlighter-rouge">RefreshWidgetActions</code> with no knowledge of what happens to it.
+The <code class="language-plaintext highlighter-rouge">Action</code> passes through the <code class="language-plaintext highlighter-rouge">WidgetProviderMiddleware</code> which kicks off a network / database fetch operation and on completion the middleware dispatches a new action to update the <code class="language-plaintext highlighter-rouge">Widgets</code> through a <code class="language-plaintext highlighter-rouge">Reducer</code>.</p>
+
+<p>There are other scenarios you might feasibly want to handle, maintaining load states, limiting request frequency etc. Note that if you start modelling load states you need to guarantee that those states are updated in failure as well as success paths.</p>
+
+<p>It’s worth noting that your <code class="language-plaintext highlighter-rouge">Redux</code> <code class="language-plaintext highlighter-rouge">State</code> type should be considered model data, not VIEW data. Your view might ultimately transform the source <code class="language-plaintext highlighter-rouge">State</code> before presentation but that separation should be maintained. Allowing your <code class="language-plaintext highlighter-rouge">State</code> to grow massive may become a headache and result in performance problems. Don’t fill your <code class="language-plaintext highlighter-rouge">State</code> with <code class="language-plaintext highlighter-rouge">Data</code> or <code class="language-plaintext highlighter-rouge">UIImage</code>s, store identifiers that can be loaded on demand. Your choices around allowing <code class="language-plaintext highlighter-rouge">Optional</code> state might help if you wanted to allow partial <code class="language-plaintext highlighter-rouge">State</code> loading.</p>
+
+<p>Now, say you want to track certain events in the app, just add an <code class="language-plaintext highlighter-rouge">AnalyticsMiddleware</code>, easy!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>final class AnalyticsMiddleware: Middleware {
+
+    private let backgroundDispatcher: Dispatching
+    private let externalTracker: Tracking
+
+    init(...)
+
+    func apply(state: State, action: Action) {
+        switch action {
+            case let action as RefreshWidgetsAction {
+                backgroundDispatcher.async { [weak self] in
+                    self?.externalTracker.refreshWidgetsRequested()
+                }
+            }
+            default: return
+        }
+    }
+}
+
+struct RefreshWidgetsAction: Action {}
+</code></pre></div></div>
+
+<p>So we’ve got <code class="language-plaintext highlighter-rouge">State</code> mutation and <code class="language-plaintext highlighter-rouge">Asynchronicity</code> locked down but our <code class="language-plaintext highlighter-rouge">WidgetListViewController</code> doesn’t update yet!</p>
+
+<p>Pick your choice of <code class="language-plaintext highlighter-rouge">Observable</code> model, maybe you’re using <code class="language-plaintext highlighter-rouge">RxSwift</code>, <code class="language-plaintext highlighter-rouge">Combine</code>, <code class="language-plaintext highlighter-rouge">KVO</code> or any other pattern that does Publisher / Subscriber notifications.</p>
+
+<p>An example might be as simple as defining a listener:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol UpdateListener {
+    func stateUpdated()
+}
+</code></pre></div></div>
+
+<p>In our <code class="language-plaintext highlighter-rouge">Store</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>private var listeners: [UpdateListener]
+
+private(set) var state: State {
+    didSet {
+        mainThreadDispatcher.async {
+            [weak self] in
+            
+            self?.listeners.forEach {
+                $0.stateUpdated()
+            }
+        }
+    }
+}
+</code></pre></div></div>
+
+<p>In our <code class="language-plaintext highlighter-rouge">WidgetListViewController</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//NOTE: Assumes our widgetListCollectionView data source accesses State on reload
+
+extension WidgetListViewController: UpdateListener {
+    func stateUpdated() {
+        widgetListCollectionView.reloadData()
+    }
+}
+</code></pre></div></div>
+
+<p>You can make it more reactive than that, but essentially that’s it end to end.</p>
+
+<hr />
+
+<h3 id="conclusion">Conclusion</h3>
+<p>Hopefully, you can see the value such an approach might have.:</p>
+<ul>
+  <li>Our <code class="language-plaintext highlighter-rouge">State</code> is consistent, predictable and (functionally) immutable.</li>
+  <li>Every part is easily tested from the <code class="language-plaintext highlighter-rouge">Store</code> through the <code class="language-plaintext highlighter-rouge">Reducers</code> and <code class="language-plaintext highlighter-rouge">Middleware</code> without creating Mocks (<em>cough</em> except thread dispatchers).</li>
+  <li>It’s easy to inspect the current state</li>
+  <li>You can track every dispatched action end to end making it easy to debug.</li>
+</ul>
+
+<p>There we go ladies, gentlemen and the plethora of goodness in between.
+<em>Redux</em>, can it help save you from your nightmares?</p>
+:ET
