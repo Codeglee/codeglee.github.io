@@ -29,19 +29,18 @@ Here's the **TL;DR**; of what I'll cover in the series:
 
 _If that sounds interesting, read on._
 
-#### Here are the scenarios we'll cover in the series:
+#### Here are the key scenarios we'll cover in the series:
 
 1. Our app has a lengthy first-run only onboarding flow that we want to skip for all but our onboarding UI tests
-2. We want to isolate our UI tests to use _static_ data in a staging environment (see the risks[^1] here)
-3. We want to enable some additional scenario configuration
+2. We want to isolate our UI tests to use a different API endpoint, fetching 'static' data from a staging environment for example (see the risks[^1] here)
 
-The core parts of this approach are an `AppLauncher` to allow us to read and configure our environment before the app is run.
+The core parts of this approach are an `AppLauncher` as an entry point to allow us to read and configure our environment before the app is run.
 
 An `AutomationContext` acts as a live-defaulted environment we can use for configuring and tracking automation arguments.
 
-A `LaunchArgumentBuilder` to make it easy to configure our scenarios
+A set of `Automation Identifiers` shared between `App` and `UI tests`.
 
-A `UITestScreen` to make it easy to encapsulate assertions and behaviours.
+A `Screen` or `Robot` to make it easy to encapsulate assertions and interactions.
 
 In this first post, we'll cover the _setup_ required to address our first scenario.
 
@@ -71,7 +70,7 @@ struct MyApp: App {
                     }
                 )
             } else {
-                MainAppFlowView()
+                ContentView()
             }
         }
     }
@@ -85,7 +84,7 @@ final class AppViewModel: ObservableObject {
     @Published private(set) var showOnboarding: Bool
     private var settingStore: SettingStorage
 
-    init(settingStore: SettingStorage = SettingStore()) {
+    init(settingStore: SettingStorage = SettingStore.shared) {
         self.settingStore = settingStore
         showOnboarding = settingStore.showOnboarding
     }
@@ -97,6 +96,24 @@ final class AppViewModel: ObservableObject {
 }
 
 ```
+An example `SettingsStore` might just be a wrapper around `UserDefaults`. For testability you should further abstract `UserDefaults` to allow it to be injectable for testability and avoid resource isolation issues[^3]:
+
+```swift
+final class SettingStore: SettingStorage {
+	static let shared = SettingsStore()
+	private init() {}
+	
+    var showOnboarding: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: "hasOnboardingBeenShown")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "hasOnboardingBeenShown")
+        }
+    }
+}
+```
+
 
 Introducing an `AutomationContext` is the next step.
 ``` swift
@@ -111,7 +128,7 @@ final class AutomationContext {
         }
     }
 
-    private init(settingStore: SettingStorage = SettingStore()) {
+    private init(settingStore: SettingStorage = SettingStore.shared) {
         self.settingStore = settingStore
 
         showOnboarding = settingStore.showOnboarding
@@ -119,7 +136,7 @@ final class AutomationContext {
 }
 ```
 
-*NOTE:* That it uses the _same settings store_ and is _initialised in the same way_.
+**_NOTE:_** That it uses the _same settings store_, if you use the `UserDefaults` wrapper then _beware_[^3].
 
 Next, we need a way to pre-configure the automation context.
 So let's create an `AppLauncher` which will grab the `CommandLine` arguments we'll use to configure the application run and a `LaunchArgumentConfigurator` to parse our arguments and update our `AutomationContext` and app state.
@@ -137,7 +154,7 @@ enum AppLauncher {
     }
 }
 
-// NOTE: Over in MyApp we remove @main as the entry point
+**_NOTE:_** Over in MyApp we remove @main as the entry point
 struct MyApp: App {...}
 
 enum LaunchArgumentConfigurator {
@@ -175,14 +192,17 @@ func testSkipsOnboarding() {
 
 1. We've left ourselves with a failing test, we should fix that in the next post
 2. We should abstract strings so they are maintainable and less prone to error
-3. Our use of `UserDefaults.standard` means that we haven't isolated our settings across different builds of the same app i.e if you had a Development vs Internal vs AppStore build they'd all share the same `UserDefaults` at the moment.
-4. We rely on a mutation of `AutomationContext` to do work, hiding this in a property setter is a bit unexpected and easy to miss. A nicer way would be to keep sets `private` and expose a method to allow this instead.
+3. Our use of `UserDefaults.standard` means that we haven't isolated our settings across our tests or across different builds of the same app i.e if you had a Development vs Internal vs AppStore build they'd all share the same `UserDefaults` at the moment. A better way of managing this would be to use an in-memory store for tests and a persisted one for production.
+4. **_Beware_** the impact of using persisted shared state and resources as they can lead to *test pollution* - a significant source of unexpected test behaviour. What is test pollution? Any resource that's ultimately persisted to disk / synchronised in the cloud is shared across tests. Consider if your tests run in parallel, multiple simulators are instantiated running different tests at the same time which use the same files on disk. If `testMarkOnboardingAsSeen` updates `UserDefaults.standard` with `seen = true` and `testMarkOnboardingAsUnseen` runs at the same time, they could easily read and write over each other and your expectations and assertions will fail inconsistently enough to send you on a wild goose chase and write off UI tests as 'flakey'. Not flakey in this way, just incorrectly architected. We'll address this in a future post.
+5. We rely on a mutation of `AutomationContext` to do work, hiding this in a property setter is a bit unexpected and easy to miss. A nicer way would be to keep sets `private` and expose a method to allow this instead.
 
 ### What's next?
 
 * Writing our first UI tests to verify our onboarding approach works.
 * Introducing enum-based constants for strings and automation identifiers
 * Introducing the Robot pattern
+
+See the [next post here](https://blog.codeglee.com/2022/03/23/an-automation-approach-pt2.html).
 
 I hope this post was informative, feel free to send me your thoughts via Twitter.
 
@@ -191,4 +211,5 @@ I hope this post was informative, feel free to send me your thoughts via Twitter
 
 [^1]: _Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, unexpected delays, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs._
 [^2]: _I say mostly because during development you get some ability to inspect and debug your app using things like the XCUI test recorder._
+[^3]: _Points 3 and 4 in "What could we do better" are critical to avoiding flakey inconsistent tests._
 
