@@ -167,6 +167,7 @@ func testSkipsOnboarding() {
 
 1. We've left ourselves with a failing test, we should fix that in the next post
 2. We should abstract strings so they are maintainable and less prone to error
+3. Our use of `UserDefaults.standard` means that we haven't isolated our settings across different builds of the same app i.e if you had a Development vs Internal vs AppStore build they'd all share the same `UserDefaults` at the moment.
 
 ### What's next?
 
