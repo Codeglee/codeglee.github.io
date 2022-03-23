@@ -1,0 +1,154 @@
+I"�2<h3 id="ui-test-automation-continued-where-did-we-get-to">UI test automation continued… where did we get to?</h3>
+<p>In the <a href="https://blog.codeglee.com/2022/03/23/an-automation-approach-pt1.html">previous post</a> we covered the setup required to externally initialise and configure our app such that the onboarding app flow could be skipped for UI test purposes.</p>
+
+<p>In this post we’ll:</p>
+
+<ul>
+  <li>Introduce an approach for shared automation identifiers</li>
+  <li>Improve our app initialisation via a shared typed enum</li>
+  <li>Swap our string constants for enum-based ones</li>
+  <li>Encapsulate our screens behaviours and assertions using the Robot pattern</li>
+  <li>Pass our failing UI test verifying that our onboarding approach works</li>
+</ul>
+
+<h4 id="app-side-launcharguments">App-side LaunchArguments</h4>
+<p>We’ll start by addressing the launch arguments<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>.
+Let’s start on the app side by encapsulating the string constant into a <code class="language-plaintext highlighter-rouge">LaunchArgumentKey enum</code>.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">LaunchArgumentKey</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">skipOnboarding</span> <span class="o">=</span> <span class="s">"-skipOnboarding"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>We’ll make this <code class="language-plaintext highlighter-rouge">enum</code> <em>shared</em> across both the App and UI Test targets.</p>
+
+<p>On the app-side we’ll update our <code class="language-plaintext highlighter-rouge">LaunchArgumentConfigurator</code> to use <code class="language-plaintext highlighter-rouge">LaunchArgumentKey</code>.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">LaunchArgumentConfigurator</span> <span class="p">{</span>
+
+    <span class="kd">static</span> <span class="kd">func</span> <span class="nf">configure</span><span class="p">(</span>
+        <span class="n">_</span> <span class="nv">context</span><span class="p">:</span> <span class="kt">AutomationContext</span><span class="p">,</span>
+        <span class="n">with</span> <span class="nv">launchArguments</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="n">launchArguments</span><span class="o">.</span><span class="nf">contains</span><span class="p">(</span><span class="kt">LaunchArgumentKey</span><span class="o">.</span><span class="n">skipOnboarding</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">showOnboarding</span> <span class="o">=</span> <span class="kc">false</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><em>NOTE:</em> If we had more launch arguments, particularly ones with associated values we could do some more interesting and intelligent configuration but for now this is enough to increase maintainability.</p>
+
+<p>Next, on the UI test side we’ll introduce a helper class to better manage launch arguments. This gives us a reusable abstraction over launch arguments.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="kt">BaseUITestCase</span><span class="p">:</span> <span class="kt">XCTestCase</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">app</span><span class="p">:</span> <span class="kt">XCUIApplication</span><span class="o">!</span>
+    <span class="kd">private</span> <span class="k">var</span> <span class="nv">launchArguments</span> <span class="o">=</span> <span class="kt">Set</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span><span class="p">()</span>
+
+    <span class="k">override</span> <span class="kd">func</span> <span class="nf">setUp</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">super</span><span class="o">.</span><span class="nf">setUp</span><span class="p">()</span>
+        <span class="n">continueAfterFailure</span> <span class="o">=</span> <span class="kc">false</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="kt">XCUIApplication</span><span class="p">()</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">launchArguments</span><span class="o">.</span><span class="n">forEach</span> <span class="p">{</span> <span class="n">argument</span> <span class="k">in</span>
+            <span class="n">launchArguments</span><span class="o">.</span><span class="nf">insert</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="kd">func</span> <span class="nf">tearDown</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="kc">nil</span>
+
+        <span class="k">super</span><span class="o">.</span><span class="nf">tearDown</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="nf">skipOnboarding</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">launchArguments</span><span class="o">.</span><span class="nf">insert</span><span class="p">(</span><span class="kt">LaunchArgumentKey</span><span class="o">.</span><span class="n">skipOnboarding</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="kd">func</span> <span class="nf">launch</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">arguments</span> <span class="o">=</span> <span class="n">launchArguments</span><span class="o">.</span><span class="nf">reduce</span><span class="p">(</span><span class="nv">into</span><span class="p">:</span> <span class="p">[],</span> <span class="p">{</span> <span class="n">result</span><span class="p">,</span> <span class="n">argument</span> <span class="k">in</span>
+            <span class="n">result</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
+        <span class="p">})</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">launchArguments</span> <span class="o">=</span> <span class="n">arguments</span>
+        <span class="n">app</span><span class="o">.</span><span class="nf">launch</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>For context around use of <code class="language-plaintext highlighter-rouge">XCUIApplication!</code> see here<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>.</p>
+
+<h4 id="revisiting-our-ui-test">Revisiting our UI test</h4>
+<p>Here’s our test case updated to use <code class="language-plaintext highlighter-rouge">skipOnboarding</code> and <code class="language-plaintext highlighter-rouge">launch</code> for the Main App Flow.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">final</span> <span class="kd">class</span> <span class="kt">MainAppFlowViewTests</span><span class="p">:</span> <span class="kt">BaseUITestCase</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="kd">func</span> <span class="nf">setUp</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">super</span><span class="o">.</span><span class="nf">setUp</span><span class="p">()</span>
+
+        <span class="nf">skipOnboarding</span><span class="p">()</span>
+        <span class="nf">launch</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="cm">/*
+     GIVEN we've previously seen the onboarding flow
+     WHEN the app starts
+     THEN the main app flow is shown
+     */</span>
+    <span class="kd">func</span> <span class="nf">testAfterSkippingOnboardingMainAppFlowIsVisible</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kt">XCTFail</span><span class="p">(</span><span class="s">"We can't assert anything yet"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>Great, we’ve made it simple to skip onboarding as part of <code class="language-plaintext highlighter-rouge">setUp</code> but we we have nothing to assert we’re on the right view yet, let’s address that now.</p>
+
+<h4 id="an-approach-for-accessibility-identifiers">An approach for accessibility identifiers</h4>
+<p>For us to verify we’re on a particular screen we need something to look for.</p>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">Automation</span> <span class="p">{</span>
+    <span class="kd">enum</span> <span class="kt">OnboardingScreen</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">AutomationIdentifying</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">completeButton</span> <span class="o">=</span> <span class="s">"automation.onboarding.complete"</span>
+    <span class="p">}</span>
+
+    <span class="kd">enum</span> <span class="kt">MainAppFlowScreen</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">AutomationIdentifying</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">title</span> <span class="o">=</span> <span class="s">"automation.main"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">protocol</span> <span class="kt">AutomationIdentifying</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">id</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span>
+<span class="p">}</span>
+<span class="kd">extension</span> <span class="kt">AutomationIdentifying</span> <span class="k">where</span> <span class="k">Self</span><span class="p">:</span> <span class="kt">RawRepresentable</span><span class="p">,</span> <span class="k">Self</span><span class="o">.</span><span class="kt">RawValue</span> <span class="o">==</span> <span class="kt">String</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">id</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="n">rawValue</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">extension</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">automationId</span><span class="p">(</span><span class="n">_</span> <span class="nv">identifying</span><span class="p">:</span> <span class="kt">AutomationIdentifying</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="nf">accessibilityIdentifier</span><span class="p">(</span><span class="n">identifying</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="what-could-we-do-better">What could we do better?</h4>
+
+<ol>
+  <li></li>
+</ol>
+
+<h3 id="whats-next">What’s next?</h3>
+
+<ul>
+  <li></li>
+</ul>
+
+<p>I hope this post was informative, feel free to send me your thoughts via Twitter.</p>
+
+<p><strong>Footnotes:</strong></p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p><em>In a real app you’ll want to do this when you have more than one use case (I use the rule of three - on the third repetition, abstract and improve)</em> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p><em>We’re implicitly unwrapping here to allow for setup and teardown to clean up appropriately.</em> <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+:ET

@@ -1,27 +1,8 @@
-import SwiftUI
+//: [Previous](@previous)
 
-//
-//  UITestSnippests.swift
-//
-//
-//  Created by Tristan Warner-Smith on 23/03/2022.
-//
-
+/*
 import SwiftUI
 import Foundation
-
-//final class OnboardingViewModel: ObservableObject {
-//    @Published var showOnboarding: Bool
-//
-//    init(showOnboarding: Bool = UserDefaults.standard.bool(forKey: "hasOnboardingBeenShown")) {
-//        self.showOnboarding = showOnboarding
-//    }
-//
-//    func markOnboardingAsShown() {
-//        UserDefaults.standard.set(true, forKey: "hasOnboardingBeenShown")
-//        showOnboarding = false
-//    }
-//}
 
 // NOTE: You can swap actor for a final class with a standard singleton
 final class AutomationContext {
@@ -150,3 +131,7 @@ func testSkipsOnboarding() {
 
     XCTFail("We're not actually verifying we've skipped onboarding yet")
 }
+*/
+
+//: [Next](@next)
+
