@@ -61,7 +61,7 @@ There are optional components that can be added that I'll try and cover later. `
 
 In `Swift` this could look something like this:
 
-```
+``` swift
 final class Store {
     private let reducer: Reducer
     private let serialDispatcher: DispatchQueueing
@@ -96,7 +96,7 @@ final class Store {
 }
 ```
 
-```
+``` swift
 protocol ActionDispatching {
     func dispatch(action: ActionProtocol)
 }
@@ -106,7 +106,7 @@ protocol ActionProtocol {}
 
 `typealias Reducer = (_ state: AppState, _ action: ActionProtocol) -> AppState`
 
-```
+``` swift
 //NOTE: This could be implemented as an OperationQueue subclass with maxConcurrentOperationCount of 1
 protocol DispatchQueueing {
     func enqueue(_ block: @escaping() -> Void)
@@ -137,7 +137,7 @@ Essentially both allow you to encapsulate asynchronous actions without blocking,
 
 Let's say you're writing an app to sell `Widgets`.
 
-```
+``` swift
 struct State {
     let widgets: [Widget]
 }
@@ -152,7 +152,7 @@ On your `WidgetListViewController` you want to let users `Refresh` the list of `
 
 Here's how we define our middleware:
 
-```
+``` swift
 protocol Middleware {
     func apply(state: State, action: Action)
 }
@@ -160,7 +160,7 @@ protocol Middleware {
 
 Our widget provider:
 
-```
+``` swift
 protocol WidgetProviding {
     func provideWidgets(completion: () -> [Widget])
 }
@@ -168,7 +168,7 @@ protocol WidgetProviding {
 
 The middleware to perform async widget providing.
 
-```
+``` swift
 final class WidgetProviderMiddleware: Middleware {
     private let widgetProvider: WidgetProviding
     private let backgroundDispatcher: Dispatching
@@ -197,7 +197,7 @@ final class WidgetProviderMiddleware: Middleware {
 
 Now the `Reducer` to update the state:
 
-```
+``` swift
 func reduce(state: State, action: ActionProtocol) -> State {
     switch action {
         case let action as UpdateWidgetsAction:
@@ -216,7 +216,7 @@ It's worth noting that your `Redux` `State` type should be considered model data
 
 Now, say you want to track certain events in the app, just add an `AnalyticsMiddleware`, easy!
 
-```
+``` swift
 final class AnalyticsMiddleware: Middleware {
 
     private let backgroundDispatcher: Dispatching
@@ -245,7 +245,7 @@ Pick your choice of `Observable` model, maybe you're using `RxSwift`, `Combine`,
 
 An example might be as simple as defining a listener:
 
-```
+``` swift
 protocol UpdateListener {
     func stateUpdated()
 }
@@ -253,7 +253,7 @@ protocol UpdateListener {
 
 In our `Store`:
 
-```
+``` swift
 private var listeners: [UpdateListener]
 
 private(set) var state: State {
@@ -271,7 +271,7 @@ private(set) var state: State {
 
 In our `WidgetListViewController`:
 
-```
+``` swift
 //NOTE: Assumes our widgetListCollectionView data source accesses State on reload
 
 extension WidgetListViewController: UpdateListener {
