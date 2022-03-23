@@ -1,0 +1,215 @@
+/*
+  Codeglee overrides - using rougify style monokai.sublime > assets/css/syntax.css and updated everytihng to be !important to override the default, quick and dirty
+*/
+.container > * {
+  max-width: none !important;
+}
+div.highlight {
+  padding: 1rem !important;
+}
+pre.highlight {
+  padding: 0 !important;
+}
+.code { padding: 0 !important; }
+
+.highlight code, .highlight pre { word-wrap:  }
+
+/* Original */
+.highlight table td { padding: 5px !important; }
+.highlight table pre { margin: 0 !important; }
+.highlight .gh {
+  color: #999999 !important;
+}
+.highlight .sr {
+  color: #f6aa11 !important;
+}
+.highlight .go {
+  color: #888888 !important;
+}
+.highlight .gp {
+  color: #555555 !important;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa !important;
+}
+.highlight .nb {
+  color: #f6aa11 !important;
+}
+.highlight .cm {
+  color: #75715e !important;
+}
+.highlight .cp {
+  color: #75715e !important;
+}
+.highlight .c1 {
+  color: #75715e !important;
+}
+.highlight .cs {
+  color: #75715e !important;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cpf {
+  color: #75715e !important;
+}
+.highlight .err {
+  color: #960050 !important;
+}
+.highlight .gr {
+  color: #960050 !important;
+}
+.highlight .gt {
+  color: #960050 !important;
+}
+.highlight .gd {
+  color: #49483e !important;
+}
+.highlight .gi {
+  color: #49483e !important;
+}
+.highlight .ge {
+  color: #49483e !important;
+}
+.highlight .kc {
+  color: #66d9ef !important;
+}
+.highlight .kd {
+  color: #66d9ef !important;
+}
+.highlight .kr {
+  color: #66d9ef !important;
+}
+.highlight .no {
+  color: #66d9ef !important;
+}
+.highlight .kt {
+  color: #66d9ef !important;
+}
+.highlight .mf {
+  color: #ae81ff !important;
+}
+.highlight .mh {
+  color: #ae81ff !important;
+}
+.highlight .il {
+  color: #ae81ff !important;
+}
+.highlight .mi {
+  color: #ae81ff !important;
+}
+.highlight .mo {
+  color: #ae81ff !important;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff !important;
+}
+.highlight .sc {
+  color: #ae81ff !important;
+}
+.highlight .se {
+  color: #ae81ff !important;
+}
+.highlight .ss {
+  color: #ae81ff !important;
+}
+.highlight .sd {
+  color: #e6db74 !important;
+}
+.highlight .s2 {
+  color: #e6db74 !important;
+}
+.highlight .sb {
+  color: #e6db74 !important;
+}
+.highlight .sh {
+  color: #e6db74 !important;
+}
+.highlight .si {
+  color: #e6db74 !important;
+}
+.highlight .sx {
+  color: #e6db74 !important;
+}
+.highlight .s1 {
+  color: #e6db74 !important;
+}
+.highlight .s, .highlight .sa, .highlight .dl {
+  color: #e6db74 !important;
+}
+.highlight .na {
+  color: #a6e22e !important;
+}
+.highlight .nc {
+  color: #a6e22e !important;
+}
+.highlight .nd {
+  color: #a6e22e !important;
+}
+.highlight .ne {
+  color: #a6e22e !important;
+}
+.highlight .nf, .highlight .fm {
+  color: #a6e22e !important;
+}
+.highlight .vc {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .nn {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .nl {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .ni {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .bp {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .vg {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .vi {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .nv, .highlight .vm {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .w {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff !important;
+  background-color: #272822 !important;
+}
+.highlight .ow {
+  color: #f92672 !important;
+}
+.highlight .nt {
+  color: #f92672 !important;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672 !important;
+}
+.highlight .kn {
+  color: #f92672 !important;
+}
+.highlight .kp {
+  color: #f92672 !important;
+}
+.highlight .o {
+  color: #f92672 !important;
+}
