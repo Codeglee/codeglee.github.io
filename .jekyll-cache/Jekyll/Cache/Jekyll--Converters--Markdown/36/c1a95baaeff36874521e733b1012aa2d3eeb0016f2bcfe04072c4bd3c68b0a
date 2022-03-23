@@ -1,4 +1,4 @@
-I"{7<h3 id="who-is-this-series-for">Who is this series for?</h3>
+I"�?<h3 id="who-is-this-series-for">Who is this series for?</h3>
 
 <p>Anyone looking for a full end-to-end approach to UI testing in a pragmatic and predictable way</p>
 
@@ -43,7 +43,14 @@
 
 <p>In this first post, we’ll cover the <em>setup</em> required to address our first scenario.</p>
 
-<h3 id="skip-onboarding">Skip Onboarding</h3>
+<h4 id="what-to-know-before-we-start">What to know before we start</h4>
+
+<p>UI tests run in their own process separate from your app and remotely interface with it. You’ll no doubt have seen this when you see <code class="language-plaintext highlighter-rouge">"MyAppUITests-Runner"</code> installed in the simulator before your app is installed and run.
+What does this mean? it means your app is mostly<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> run like a black box where the only points of interface are on the initialisation of your app via launch arguments and through the accessibility engine that underpins XCTest.</p>
+
+<p><em>Where does that leave us?</em> with app initialisation via launch arguments as our primary means of configuring the app.</p>
+
+<h3 id="lets-skip-onboarding">Let’s Skip Onboarding</h3>
 <p>Let’s imagine our simplified app looks something like this, when the app starts we initialise our state around onboarding.</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
@@ -108,9 +115,9 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><em>NOTE:</em> that it uses the <em>same settings store</em> and is <em>initialised in the same way</em>.</p>
+<p><em>NOTE:</em> That it uses the <em>same settings store</em> and is <em>initialised in the same way</em>.</p>
 
-<p>Next we need a way to pre-configure the automation context.
+<p>Next, we need a way to pre-configure the automation context.
 So let’s create an <code class="language-plaintext highlighter-rouge">AppLauncher</code> which will grab the <code class="language-plaintext highlighter-rouge">CommandLine</code> arguments we’ll use to configure the application run and a <code class="language-plaintext highlighter-rouge">LaunchArgumentConfigurator</code> to parse our arguments and update our <code class="language-plaintext highlighter-rouge">AutomationContext</code> and app state.</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
@@ -139,8 +146,9 @@ So let’s create an <code class="language-plaintext highlighter-rouge">AppLaunc
 </code></pre></div></div>
 
 <p>So what have we done? We’ve removed <code class="language-plaintext highlighter-rouge">@main</code> from <code class="language-plaintext highlighter-rouge">MyApp</code> and introduced a new entry point.
-We’ve expanded the role of <code class="language-plaintext highlighter-rouge">AutomationContext</code> to enable configuring our <code class="language-plaintext highlighter-rouge">SettingsStore</code> before <code class="language-plaintext highlighter-rouge">MyApp</code> is run and then finally we’ve started our app.
-What are the downsides of this approach? Well, we’ve likely introduced some additional app start time as the settings store is initialised, read and written to.</p>
+We’ve expanded the role of <code class="language-plaintext highlighter-rouge">AutomationContext</code> to enable configuring our <code class="language-plaintext highlighter-rouge">SettingsStore</code> before <code class="language-plaintext highlighter-rouge">MyApp</code> is run and then finally we’ve started our app.</p>
+
+<p>What are the downsides of this approach? Well, we’ve likely introduced some additional app start time as the settings store is initialised, read and written to.</p>
 
 <p>What have we gained here? The ability to unit test our <code class="language-plaintext highlighter-rouge">LaunchArgumentConfigurator, AutomationContext, AppViewModel and SettingStore</code> via mutations to an injectable instance of <code class="language-plaintext highlighter-rouge">SettingsStorable</code> before we even get to UI tests which can now be configured to skip onboarding via a launch argument.</p>
 
@@ -165,14 +173,29 @@ What are the downsides of this approach? Well, we’ve likely introduced some ad
 <ol>
   <li>We’ve left ourselves with a failing test, we should fix that in the next post</li>
   <li>We should abstract strings so they are maintainable and less prone to error</li>
+  <li>Our use of <code class="language-plaintext highlighter-rouge">UserDefaults.standard</code> means that we haven’t isolated our settings across different builds of the same app i.e if you had a Development vs Internal vs AppStore build they’d all share the same <code class="language-plaintext highlighter-rouge">UserDefaults</code> at the moment.</li>
+  <li>We rely on a mutation of <code class="language-plaintext highlighter-rouge">AutomationContext</code> to do work, hiding this in a property setter is a bit unexpected and easy to miss. A nicer way would be to keep sets <code class="language-plaintext highlighter-rouge">private</code> and expose a method to allow this instead.</li>
 </ol>
+
+<h3 id="whats-next">What’s next?</h3>
+
+<ul>
+  <li>Writing our first UI tests to verify our onboarding approach works.</li>
+  <li>Introducing enum-based constants for strings and automation identifiers</li>
+  <li>Introducing the Robot pattern</li>
+</ul>
+
+<p>I hope this post was informative, feel free to send me your thoughts via Twitter.</p>
 
 <p><strong>Footnotes:</strong></p>
 
 <div class="footnotes" role="doc-endnotes">
   <ol>
     <li id="fn:1" role="doc-endnote">
-      <p><em>Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs.</em> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+      <p><em>Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, unexpected delays, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs.</em> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p><em>I say mostly because during development you get some ability to inspect and debug your app using things like the XCUI test recorder.</em> <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
 </div>
