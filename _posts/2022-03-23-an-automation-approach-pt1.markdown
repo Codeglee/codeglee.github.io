@@ -180,5 +180,5 @@ I hope this post was informative, feel free to send me your thoughts via Twitter
 
 **Footnotes:**
 
-[^1]: _Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs._
+[^1]: _Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, unexpected delays, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs._
 
