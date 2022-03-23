@@ -45,7 +45,14 @@ A `UITestScreen` to make it easy to encapsulate assertions and behaviours.
 
 In this first post, we'll cover the _setup_ required to address our first scenario.
 
-### Skip Onboarding
+#### What to know before we start
+
+UI tests run in their own process separate from your app and remotely interface with it. You'll no doubt have seen this when you see `"MyAppUITests-Runner"` installed in the simulator before your app is installed and run.
+What does this mean? it means your app is mostly[^2] run like a black box where the only points of interface are on the initialisation of your app via launch arguments and through the accessibility engine that underpins XCTest.
+
+_Where does that leave us?_ with app initialisation via launch arguments as our primary means of configuring the app.
+
+### Let's Skip Onboarding
 Let's imagine our simplified app looks something like this, when the app starts we initialise our state around onboarding.
 
 ``` swift
@@ -145,6 +152,7 @@ enum LaunchArgumentConfigurator {
 
 So what have we done? We've removed `@main` from `MyApp` and introduced a new entry point.
 We've expanded the role of `AutomationContext` to enable configuring our `SettingsStore` before `MyApp` is run and then finally we've started our app.
+
 What are the downsides of this approach? Well, we've likely introduced some additional app start time as the settings store is initialised, read and written to.
 
 What have we gained here? The ability to unit test our `LaunchArgumentConfigurator, AutomationContext, AppViewModel and SettingStore` via mutations to an injectable instance of `SettingsStorable` before we even get to UI tests which can now be configured to skip onboarding via a launch argument.
@@ -168,6 +176,7 @@ func testSkipsOnboarding() {
 1. We've left ourselves with a failing test, we should fix that in the next post
 2. We should abstract strings so they are maintainable and less prone to error
 3. Our use of `UserDefaults.standard` means that we haven't isolated our settings across different builds of the same app i.e if you had a Development vs Internal vs AppStore build they'd all share the same `UserDefaults` at the moment.
+4. We rely on a mutation of `AutomationContext` to do work, hiding this in a property setter is a bit unexpected and easy to miss. A nicer way would be to keep sets `private` and expose a method to allow this instead.
 
 ### What's next?
 
@@ -181,4 +190,5 @@ I hope this post was informative, feel free to send me your thoughts via Twitter
 **Footnotes:**
 
 [^1]: _Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, unexpected delays, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs._
+[^2]: _I say mostly because during development you get some ability to inspect and debug your app using things like the XCUI test recorder._
 
