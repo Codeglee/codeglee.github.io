@@ -34,7 +34,10 @@ protocol SettingStorage {
     var showOnboarding: Bool { get set }
 }
 
-struct SettingStore: SettingStorage {
+final class SettingStore: SettingStorage {
+    static let shared = SettingStore()
+    private init() {}
+
     var showOnboarding: Bool {
         get {
             UserDefaults.standard.bool(forKey: "hasOnboardingBeenShown")

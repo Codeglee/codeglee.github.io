@@ -20,7 +20,7 @@ What this series isn't:
 
 Here's the **TL;DR**; of what I'll cover in the series:
 
-* CommandLine argument-based app initialisation
+* `CommandLine` argument-based app initialisation
 * An approach for app configuration (using SwiftUI as an example)
 * How to isolate our UI test state across builds
 * Some helpers for UI test scenario configuration
@@ -47,9 +47,9 @@ In this first post, we'll cover the _setup_ required to address our first scenar
 #### What to know before we start
 
 UI tests run in their own process separate from your app and remotely interface with it. You'll no doubt have seen this when you see `"MyAppUITests-Runner"` installed in the simulator before your app is installed and run.
-What does this mean? it means your app is mostly[^2] run like a black box where the only points of interface are on the initialisation of your app via launch arguments and through the accessibility engine that underpins XCTest.
+What does this mean? It means your app is mostly[^2] run like a black box where the only points of interface are on the initialisation of your app via launch arguments and through the accessibility engine that underpins XCTest.
 
-_Where does that leave us?_ with app initialisation via launch arguments as our primary means of configuring the app.
+_Where does that leave us?_ With app initialisation via launch arguments as our primary means of configuring the app.
 
 ### Let's Skip Onboarding
 Let's imagine our simplified app looks something like this, when the app starts we initialise our state around onboarding.
@@ -100,9 +100,9 @@ An example `SettingsStore` might just be a wrapper around `UserDefaults`. For te
 
 ```swift
 final class SettingStore: SettingStorage {
-	static let shared = SettingsStore()
-	private init() {}
-	
+    static let shared = SettingStore()
+    private init() {}
+
     var showOnboarding: Bool {
         get {
             UserDefaults.standard.bool(forKey: "hasOnboardingBeenShown")
@@ -119,7 +119,6 @@ Introducing an `AutomationContext` is the next step.
 ``` swift
 final class AutomationContext {
     static let shared = AutomationContext()
-
     private let settingStore: SettingStorage
 
     var showOnboarding: Bool {
@@ -136,7 +135,7 @@ final class AutomationContext {
 }
 ```
 
-**_NOTE:_** That it uses the _same settings store_, if you use the `UserDefaults` wrapper then _beware_[^3].
+**_NOTE:_** Be aware of the dangers[^3] of using a `UserDefault`-backed option like `SettingsStore`. Not thinking through resources that are shared across tests, and simulators is a common cause of unexpected results and perceived test flakeyness.
 
 Next, we need a way to pre-configure the automation context.
 So let's create an `AppLauncher` which will grab the `CommandLine` arguments we'll use to configure the application run and a `LaunchArgumentConfigurator` to parse our arguments and update our `AutomationContext` and app state.
@@ -147,14 +146,13 @@ So let's create an `AppLauncher` which will grab the `CommandLine` arguments we'
 enum AppLauncher {
 
     static func main() throws {
-
         LaunchArgumentConfigurator.configure(AutomationContext.shared, with: CommandLine.arguments)
 
         MyApp.main()
     }
 }
 
-**_NOTE:_** Over in MyApp we remove @main as the entry point
+// NOTE: We remove the @main annotation as AppLauncher is now our entry point
 struct MyApp: App {...}
 
 enum LaunchArgumentConfigurator {
@@ -170,7 +168,7 @@ enum LaunchArgumentConfigurator {
 So what have we done? We've removed `@main` from `MyApp` and introduced a new entry point.
 We've expanded the role of `AutomationContext` to enable configuring our `SettingsStore` before `MyApp` is run and then finally we've started our app.
 
-What are the downsides of this approach? Well, we've likely introduced some additional app start time as the settings store is initialised, read and written to.
+What are the downsides of this approach? Well, we've likely introduced some additional app start time as the settings store is initialised, read, and written to.
 
 What have we gained here? The ability to unit test our `LaunchArgumentConfigurator, AutomationContext, AppViewModel and SettingStore` via mutations to an injectable instance of `SettingsStorable` before we even get to UI tests which can now be configured to skip onboarding via a launch argument.
 
@@ -209,7 +207,7 @@ I hope this post was informative, feel free to send me your thoughts via Twitter
 
 **Footnotes:**
 
-[^1]: _Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, unexpected delays, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs._
+[^1]: _Relying on live networking makes our UI tests more realistic but also more prone to failure in case of outages, unexpected delays, changes in contract at a separate cadence than the app tests etc. Be aware it also puts additional resource pressure on your backend. If this is an issue, moving to an offline-mock based networking approach can be a good choice but with its own tradeoffs. Take a look at some approaches for networking mocks on [hackingwithswift](https://www.hackingwithswift.com/articles/153/how-to-test-ios-networking-code-the-easy-way) and [John Sundell's great resource](https://www.swiftbysundell.com/articles/testing-networking-logic-in-swift/)_
 [^2]: _I say mostly because during development you get some ability to inspect and debug your app using things like the XCUI test recorder._
 [^3]: _Points 3 and 4 in "What could we do better" are critical to avoiding flakey inconsistent tests._
 
