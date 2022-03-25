@@ -182,18 +182,19 @@ The very last task is to update our UI tests so they trigger use of our safe, te
 In `BaseUITestCase` we add:
 
 ```swift
-    func useTestSafeUserDefaults() {
-        launchArguments.insert(LaunchArgumentKey.useInMemoryUserDefaults.rawValue)
-    }
+func useTestSafeUserDefaults() {
+    launchArguments.insert(LaunchArgumentKey.useInMemoryUserDefaults.rawValue)
+}
 ```
 We could add this call in both our `OnboardingView` and `ContentView` tests, however as we want all our UI tests to be safe and predictable by default, we'll add it to our `BaseUITestCase`'s `setUp`.
 
 ```swift
-    override func setUp() {
-        ...
-        launchArguments = Set<String>(app.launchArguments)
-        useTestableUserDefaults()
-    }
+override func setUp() {
+    super.setUp()
+    ...
+    launchArguments = Set<String>(app.launchArguments)
+    useTestSafeUserDefaults()
+}
 ```
 
 Let's re-run our tests, in parallel and randomly and run them 100 times to be sure we fixed the _test pollution_ issue.
