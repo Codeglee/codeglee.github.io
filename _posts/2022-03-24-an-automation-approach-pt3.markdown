@@ -246,8 +246,8 @@ func testOnboarding_isOnConfirmStage_next_showsContentScreen() {
 }
 ```
 ### What happens if I run this?
-Well, it depends if you've got randomise execution order for your tests.
-If they're run randomly and the **last** test is run **first** then all the other tests fail. Or if you run your tests in parallel this could easily happen too.
+Well, it depends if you've got randomise execution order or parallel running configured for your tests.
+If they're run randomly and the **last** test is run **first** then all the other tests fail.
 
 Why is this? I mentioned this in a previous post, we're suffering from _test pollution_.
 
