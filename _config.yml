@@ -18,10 +18,9 @@ email: blog@codeglee.com
 description: >- # this means to ignore newlines until "baseurl:"
   A repository of codified meanderings and pondered ideas.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://blog.codeglee.com" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://blog.codeglee.com" # the base hostname & protocol for your site, e.g. http://example.com
 twitter: https://twitter.com/codeglee
 github_username: codeglee
-google_analytics: "G-KDTVGSDQK2"
 
 # Build settings
 markdown: kramdown
