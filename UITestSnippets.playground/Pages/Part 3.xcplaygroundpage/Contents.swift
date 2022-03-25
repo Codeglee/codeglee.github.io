@@ -1,12 +1,7 @@
-import SwiftUI
+//: [Previous](@previous)
 
-//
-//  UITestSnippests.swift
-//
-//
-//  Created by Tristan Warner-Smith on 23/03/2022.
-//
-/*
+import Foundation
+
 import SwiftUI
 import Foundation
 
@@ -292,4 +287,6 @@ func testSkipsOnboarding() {
     XCTFail("We're not actually verifying we've skipped onboarding yet")
 }
 */
-*/
+
+
+//: [Next](@next)

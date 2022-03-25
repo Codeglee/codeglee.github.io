@@ -1,0 +1,264 @@
+I"``<h3 id="ui-test-automation-continued-where-did-we-get-to">UI test automation continued… where did we get to?</h3>
+<p>In the <a href="https://blog.codeglee.com/2022/03/23/an-automation-approach-pt2.html">previous post</a>, we covered encapsulating automation and launch argument constants, encapsulated launch argument configuration for our UI tests and wrapped our interactions and assertions in a Robot screen to make our tests easy to read and understand.</p>
+
+<p>In this post we’ll:</p>
+
+<ul>
+  <li>Flesh out our <code class="language-plaintext highlighter-rouge">Onboarding</code> flow views with some more complexity</li>
+  <li>We’ll write UI tests for <code class="language-plaintext highlighter-rouge">Onboarding</code> to address the changes in design</li>
+  <li>Introduce an in-memory approach to avoid test pollution</li>
+</ul>
+
+<h4 id="lets-make-onboarding-a-bit-more-complex">Let’s make onboarding a bit more complex…</h4>
+
+<p>Let’s introduce a 3 stage onboarding process. I’ll model that with an <code class="language-plaintext highlighter-rouge">OnboardingStage</code> enum.
+For the sake of brevity, I’ll extend this enum to return content-specific to the stage.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">OnboardingStage</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">CaseIterable</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">welcome</span>
+    <span class="k">case</span> <span class="n">catalog</span>
+    <span class="k">case</span> <span class="n">confirm</span>
+    
+    <span class="k">var</span> <span class="nv">icon</span><span class="p">:</span> <span class="kt">Image</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+    <span class="k">var</span> <span class="nv">title</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span> 
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+    <span class="k">var</span> <span class="nv">buttonTitle</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+    <span class="k">var</span> <span class="nv">buttonColour</span><span class="p">:</span> <span class="kt">Color</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+    <span class="k">var</span> <span class="nv">buttonAutomationId</span><span class="p">:</span> <span class="kt">AutomationIdentifying</span> <span class="p">{</span> 
+        <span class="k">if</span> <span class="k">self</span> <span class="o">==</span> <span class="o">.</span><span class="n">confirm</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kt">Automation</span><span class="o">.</span><span class="kt">OnboardingScreen</span><span class="o">.</span><span class="n">complete</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kt">Automation</span><span class="o">.</span><span class="kt">OnboardingScreen</span><span class="o">.</span><span class="n">next</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>Then a trimmed version of our new onboarding view.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">OnboardingView</span><span class="p">:</span> <span class="kt">View</span> <span class="p">{</span>
+    <span class="kd">@State</span> <span class="k">var</span> <span class="nv">stage</span><span class="p">:</span> <span class="kt">OnboardingStage</span> <span class="o">=</span> <span class="o">.</span><span class="n">welcome</span>
+    
+    <span class="k">let</span> <span class="nv">complete</span><span class="p">:</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span>
+    <span class="k">var</span> <span class="nv">body</span><span class="p">:</span> <span class="kd">some</span> <span class="kt">View</span> <span class="p">{</span>
+        <span class="kt">GeometryReader</span> <span class="p">{</span> <span class="n">geometry</span> <span class="k">in</span>
+            <span class="kt">ZStack</span><span class="p">(</span><span class="nv">alignment</span><span class="p">:</span> <span class="o">.</span><span class="n">bottom</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kt">Color</span><span class="o">.</span><span class="n">clear</span>
+
+                <span class="kt">VStack</span> <span class="p">{</span>
+
+                    <span class="k">Self</span><span class="o">.</span><span class="nf">onboardingPage</span><span class="p">(</span>
+                        <span class="nv">for</span><span class="p">:</span> <span class="n">stage</span><span class="p">,</span>
+                        <span class="nv">in</span><span class="p">:</span> <span class="n">geometry</span>
+                    <span class="p">)</span>
+
+                    <span class="kt">Button</span><span class="p">(</span>
+                        <span class="nv">action</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="k">if</span> <span class="n">stage</span><span class="o">.</span><span class="n">isLast</span> <span class="p">{</span>
+                                <span class="nf">complete</span><span class="p">()</span>
+                            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                                <span class="n">withAnimation</span> <span class="p">{</span>
+                                    <span class="n">stage</span><span class="o">.</span><span class="nf">next</span><span class="p">()</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">},</span>
+                        <span class="nv">label</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="kt">Text</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">buttonTitle</span><span class="p">)</span>
+                                <span class="o">.</span><span class="nf">font</span><span class="p">(</span><span class="o">.</span><span class="nf">system</span><span class="p">(</span><span class="o">.</span><span class="n">title3</span><span class="p">,</span> <span class="nv">design</span><span class="p">:</span> <span class="o">.</span><span class="n">rounded</span><span class="p">))</span>
+                                <span class="o">.</span><span class="nf">frame</span><span class="p">(</span><span class="nv">maxWidth</span><span class="p">:</span> <span class="o">.</span><span class="n">infinity</span><span class="p">)</span>
+                                <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="o">.</span><span class="n">vertical</span><span class="p">)</span>
+                                <span class="o">.</span><span class="nf">background</span><span class="p">(</span>
+                                    <span class="kt">RoundedRectangle</span><span class="p">(</span>
+                                        <span class="nv">cornerRadius</span><span class="p">:</span> <span class="kt">Style</span><span class="o">.</span><span class="n">cornerRadius</span><span class="p">,</span>
+                                        <span class="nv">style</span><span class="p">:</span> <span class="o">.</span><span class="n">continuous</span>
+                                    <span class="p">)</span><span class="o">.</span><span class="nf">fill</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">buttonColour</span><span class="p">)</span>
+                                <span class="p">)</span>
+                                <span class="o">.</span><span class="nf">foregroundColor</span><span class="p">(</span><span class="o">.</span><span class="n">primary</span><span class="p">)</span>
+                        <span class="p">})</span>
+                    <span class="o">.</span><span class="nf">buttonStyle</span><span class="p">(</span><span class="o">.</span><span class="n">plain</span><span class="p">)</span>
+                    <span class="o">.</span><span class="nf">automationId</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">automationId</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="o">.</span><span class="nf">padding</span><span class="p">(</span><span class="o">.</span><span class="n">horizontal</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>    
+</code></pre></div></div>
+<p>I’ve pulled the onboarding page view out for length but fundamentally it’s just this:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">Image</span>
+
+<span class="kt">Text</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+<span class="o">.</span><span class="nf">automationId</span><span class="p">(</span><span class="kt">Automation</span><span class="o">.</span><span class="kt">OnboardingScreen</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+
+<span class="kt">Text</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+</code></pre></div></div>
+<p>Tapping the <code class="language-plaintext highlighter-rouge">Next</code> button goes through the stages from <code class="language-plaintext highlighter-rouge">welcome</code> to <code class="language-plaintext highlighter-rouge">catalogue</code> to <code class="language-plaintext highlighter-rouge">confirmation</code>.</p>
+
+<p>Tapping the <code class="language-plaintext highlighter-rouge">Complete</code> button calls our <code class="language-plaintext highlighter-rouge">complete: () -&gt; Void</code> callback.
+<em><strong>NOTE:</strong></em> Ideally you’d abstract this all behind a testable <code class="language-plaintext highlighter-rouge">ViewModel</code> but there’s a lot to cover here so I won’t.</p>
+
+<p>Here’s our three screens:</p>
+
+<p><img src="/assets/images/onboarding-stages.png" alt="alt text" title="Shows three screens with image, title, body text and a button showing next or complete" /></p>
+
+<p>I’m sure you’ll forgive the design, it just adds some testable differences. In this case the title and button have <code class="language-plaintext highlighter-rouge">Automation Ids</code>.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">OnboardingScreen</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">AutomationIdentifying</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">title</span> <span class="o">=</span> <span class="s">"automation.onboarding.stage.title"</span>
+    <span class="k">case</span> <span class="n">complete</span> <span class="o">=</span> <span class="s">"automation.onboarding.complete"</span>
+    <span class="k">case</span> <span class="n">next</span> <span class="o">=</span> <span class="s">"automation.onboarding.next"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="lets-write-some-ui-tests">Let’s write some UI tests</h4>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">final</span> <span class="kd">class</span> <span class="kt">OnboardingViewTests</span><span class="p">:</span> <span class="kt">BaseUITestCase</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="kd">func</span> <span class="nf">setUp</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">super</span><span class="o">.</span><span class="nf">setUp</span><span class="p">()</span>
+
+        <span class="nf">launch</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="cm">/*
+        GIVEN I start the app from scratch
+        WHEN the onboarding screen shows
+        THEN I see the welcome stage
+     */</span>
+    <span class="kd">func</span> <span class="nf">testOnboarding_showsWelcomeStageByDefault</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kt">OnboardingScreen</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+            <span class="o">.</span><span class="nf">isOnScreen</span><span class="p">()</span>
+            <span class="o">.</span><span class="nf">showsTitle</span><span class="p">(</span><span class="s">"Welcome"</span><span class="p">)</span>
+            <span class="o">.</span><span class="nf">isShowingNextButton</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">OnboardingScreen</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="k">let</span> <span class="nv">app</span><span class="p">:</span> <span class="kt">XCUIApplication</span>
+    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">app</span><span class="p">:</span> <span class="kt">XCUIApplication</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="k">var</span> <span class="nv">title</span><span class="p">:</span> <span class="kt">XCUIElement</span> <span class="p">{</span> <span class="n">app</span><span class="o">.</span><span class="n">staticTexts</span><span class="p">[</span><span class="kt">Automation</span><span class="o">.</span><span class="kt">OnboardingScreen</span><span class="o">.</span><span class="n">title</span><span class="p">]</span> <span class="p">}</span>
+    <span class="kd">private</span> <span class="k">var</span> <span class="nv">nextButton</span><span class="p">:</span> <span class="kt">XCUIElement</span> <span class="p">{</span> <span class="n">app</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="kt">Automation</span><span class="o">.</span><span class="kt">OnboardingScreen</span><span class="o">.</span><span class="n">next</span><span class="p">]</span> <span class="p">}</span>
+    <span class="kd">private</span> <span class="k">var</span> <span class="nv">completeButton</span><span class="p">:</span> <span class="kt">XCUIElement</span> <span class="p">{</span> <span class="n">app</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="kt">Automation</span><span class="o">.</span><span class="kt">OnboardingScreen</span><span class="o">.</span><span class="n">complete</span><span class="p">]</span> <span class="p">}</span>
+
+    <span class="kd">@discardableResult</span>
+    <span class="kd">func</span> <span class="nf">isOnScreen</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+        <span class="kt">XCTAssert</span><span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">exists</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">self</span>
+    <span class="p">}</span>
+
+    <span class="kd">@discardableResult</span>
+    <span class="kd">func</span> <span class="nf">showsTitle</span><span class="p">(</span><span class="n">_</span> <span class="nv">text</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+        <span class="kt">XCTAssertEqual</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">title</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">self</span>
+    <span class="p">}</span>
+
+    <span class="kd">@discardableResult</span>
+    <span class="kd">func</span> <span class="nf">isShowingNextButton</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+        <span class="kt">XCTAssert</span><span class="p">(</span><span class="n">nextButton</span><span class="o">.</span><span class="n">exists</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">self</span>
+    <span class="p">}</span>
+
+    <span class="kd">@discardableResult</span>
+    <span class="kd">func</span> <span class="nf">isShowingCompleteButton</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+        <span class="kt">XCTAssert</span><span class="p">(</span><span class="n">completeButton</span><span class="o">.</span><span class="n">exists</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">self</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>We run our tests and… great! They pass. Let’s add tests for the next two stages.</p>
+
+<p>We’ll add a <code class="language-plaintext highlighter-rouge">next</code> and <code class="language-plaintext highlighter-rouge">complete</code> interaction to our <code class="language-plaintext highlighter-rouge">OnboardingScreen</code></p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">@discardableResult</span>
+<span class="kd">func</span> <span class="nf">next</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+    <span class="kt">XCTAssert</span><span class="p">(</span><span class="n">nextButton</span><span class="o">.</span><span class="n">exists</span><span class="p">)</span>
+    <span class="n">nextButton</span><span class="o">.</span><span class="nf">tap</span><span class="p">()</span>
+    <span class="k">return</span> <span class="k">self</span>
+<span class="p">}</span>
+
+<span class="kd">@discardableResult</span>
+<span class="kd">func</span> <span class="nf">complete</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="k">Self</span> <span class="p">{</span>
+    <span class="kt">XCTAssert</span><span class="p">(</span><span class="n">completeButton</span><span class="o">.</span><span class="n">exists</span><span class="p">)</span>
+    <span class="n">completeButton</span><span class="o">.</span><span class="nf">tap</span><span class="p">()</span>
+    <span class="k">return</span> <span class="k">self</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>Then add our remaining UI tests.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+    GIVEN I am on the welcome onboarding stage
+    WHEN I press the next button
+    THEN I am shown the catalogue stage
+ */</span>
+<span class="kd">func</span> <span class="nf">testOnboarding_isOnWelcomeStage_next_showsCatalogueStage</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">OnboardingScreen</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+        <span class="o">.</span><span class="nf">isOnScreen</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">showsTitle</span><span class="p">(</span><span class="s">"Welcome"</span><span class="p">)</span>
+        <span class="o">.</span><span class="nf">next</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">showsTitle</span><span class="p">(</span><span class="s">"Shiny, shiny things"</span><span class="p">)</span>
+        <span class="o">.</span><span class="nf">isShowingNextButton</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="cm">/*
+    GIVEN I am on the catalogue onboarding stage
+    WHEN I press the next button
+    THEN I am shown the confirm stage
+ */</span>
+<span class="kd">func</span> <span class="nf">testOnboarding_isOnCatalogueStage_next_showsConfirmStage</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">OnboardingScreen</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+        <span class="o">.</span><span class="nf">isOnScreen</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">next</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">next</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">showsTitle</span><span class="p">(</span><span class="s">"Ready to start?"</span><span class="p">)</span>
+        <span class="o">.</span><span class="nf">isShowingCompleteButton</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="cm">/*
+    GIVEN I am on the confirm onboarding stage
+    WHEN I press the complete button
+    THEN I am shown the content screen
+ */</span>
+<span class="kd">func</span> <span class="nf">testOnboarding_isOnConfirmStage_next_showsContentScreen</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">OnboardingScreen</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+        <span class="o">.</span><span class="nf">isOnScreen</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">next</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">next</span><span class="p">()</span>
+        <span class="o">.</span><span class="nf">complete</span><span class="p">()</span>
+
+    <span class="kt">ContentScreen</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+        <span class="o">.</span><span class="nf">isOnScreen</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h3 id="what-happens-if-i-run-this">What happens if I run this?</h3>
+<p>Well, it depends if you’ve got randomise execution order for your tests.
+If they’re run randomly and the <strong>last</strong> test is run <strong>first</strong> then all the other tests fail. Or if you run your tests in parallel this could easily happen too.</p>
+
+<p>Why is this? I mentioned this in a previous post, we’re suffering from <em>test pollution</em>.</p>
+
+<p>You see, the issue is that <em>if</em> you used the <code class="language-plaintext highlighter-rouge">UserDefaults</code>-backed <code class="language-plaintext highlighter-rouge">SettingStore</code> the <em>last</em> test ends up setting <code class="language-plaintext highlighter-rouge">showOnboarding</code> to <code class="language-plaintext highlighter-rouge">false</code> and as a result, all the other tests no longer show onboarding so our tests fail.</p>
+
+<h4 id="this-is-a-big-problem-right">This is a big problem, right?</h4>
+<p>It absolutely is, and it applies to all persisted shared resources not just <code class="language-plaintext highlighter-rouge">UserDefaults</code>.</p>
+
+<h3 id="what-do-we-do-about-it">What do we do about it?</h3>
+<p>We roll our sleeves up and take a look at part 4 of this series where we address test pollution head-on.</p>
+
+<h4 id="what-did-we-cover">What did we cover?</h4>
+<ol>
+  <li></li>
+</ol>
+
+<h3 id="whats-next">What’s next?</h3>
+
+<ul>
+  <li>We’ll flesh out our <code class="language-plaintext highlighter-rouge">Onboarding</code> flow views</li>
+</ul>
+
+<p>I hope this post was informative, feel free to send me your thoughts via Twitter.</p>
+
+<p><strong>Footnotes:</strong></p>
+
+:ET
