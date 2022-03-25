@@ -105,10 +105,10 @@ final class SettingStore: SettingStorage {
 
     var showOnboarding: Bool {
         get {
-            UserDefaults.standard.bool(forKey: "hasOnboardingBeenShown")
+            !UserDefaults.standard.bool(forKey: "hasOnboardingBeenShown")
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: "hasOnboardingBeenShown")
+            UserDefaults.standard.set(!newValue, forKey: "hasOnboardingBeenShown")
         }
     }
 }
