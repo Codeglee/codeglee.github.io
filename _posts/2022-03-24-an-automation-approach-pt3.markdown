@@ -12,7 +12,7 @@ In this post we'll:
 
 * Flesh out our `Onboarding` flow views with some more complexity
 * We'll write UI tests for `Onboarding` to address the changes in design
-* Introduce an in-memory approach to avoid test pollution
+* Discover the fundamental flaw in our `SettingStore`
 
 #### Let's make onboarding a bit more complex...
 
