@@ -251,19 +251,17 @@ If they're run randomly and the **last** test is run **first** then all the othe
 
 Why is this? I mentioned this in a previous post, we're suffering from _test pollution_.
 
-You see, the issue is that *if* you used the `UserDefaults`-backed `SettingStore` the *last* test ends up setting `showOnboarding` to `false` and as a result, all the other tests no longer show onboarding so our tests fail.
+You see, the issue is that *if* you used the `UserDefaults`-backed `SettingStore` the *last* test ends up setting `showOnboarding` to `false` and as a result, when they access `UserDefaults` they're told not to show onboarding, instead we jump to the `content screen` so our tests fail.
 
 #### This is a big problem, right?
 It absolutely is, and it applies to all persisted shared resources not just `UserDefaults`.
 
-### What do we do about it?
-We roll our sleeves up and take a look at part 4 of this series where we address test pollution head-on.
-
-#### What did we cover?
+#### So what did we cover?
 1. We added a staged onboarding process
 2. We added UI tests for our onboarding screens, we tested both the _titles_ and _buttons_ were as expected both by default and after interaction
 3. We realised we have a core testing problem to solve
 
-
+### What do we do next?
+We roll our sleeves up and take a look at part 4 of this series where we address _test pollution_ head-on.
 
 I hope this post was informative, feel free to send me your thoughts via Twitter.
