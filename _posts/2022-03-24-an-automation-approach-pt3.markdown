@@ -262,6 +262,6 @@ It absolutely is, and it applies to all persisted shared resources not just `Use
 3. We realised we have a core testing problem to solve
 
 ### What do we do next?
-We roll our sleeves up and take a look at part 4 of this series where we address _test pollution_ head-on.
+We roll our sleeves up and take a look at [part 4](https://blog.codeglee.com/2022/03/23/an-automation-approach-pt4.html) of this series where we address _test pollution_ head-on.
 
 I hope this post was informative, feel free to send me your thoughts via Twitter.
