@@ -3,6 +3,7 @@ layout: post
 title: UI testing, a simple approach - Part 5
 excerpt_separator:  <!--more-->
 tags: testing automation
+published: false
 ---
 
 ### UI test automation continued... where did we get to?
