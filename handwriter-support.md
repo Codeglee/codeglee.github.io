@@ -13,6 +13,6 @@ Great! Let's hear it, reach out via the methods below
 
 ## Contact us via
 
-* <a href:”mailto:handwriter-support@codeglee.com”>Email for support</a>
-* <a href:”mailto:handwriter-support@codeglee.com”>Email for feedback</a>
+* [Email for support](mailto:handwriter-support@codeglee.com?subject=Support)
+* [Email for feedback](mailto:handwriter-support@codeglee.com?subject=Feedback)
 * [Discord](https://discord.gg/Y8jkeVpk)
