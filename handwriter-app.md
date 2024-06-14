@@ -1,9 +1,8 @@
 ---
 layout: page
-title: Handwriter - App
+title: Handwriter
 permalink: /handwriter-app/
 ---
-# Announcing the HandWriter app!
 
 Ashamed of your penmanship? struggling to read your own scrawl? Time to take back control with **HandWriter**!
 
