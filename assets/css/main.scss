@@ -7,3 +7,7 @@ $layout-reverse: true !default;
 @import "hydeout";
 
 @import "syntaxhighlighter.css";
+
+// Custom css override
+
+@media (min-width: 49rem) { html { font-size: 1.0rem; } }
