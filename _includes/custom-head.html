@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="/assets/css/syntaxhighlighter.css" />
 
 <!-- Analytics -->
+{% if site.google_analytics and jekyll.environment == 'production' %}
 {% include analytics.html %}
+{% endif %}
