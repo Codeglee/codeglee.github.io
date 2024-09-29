@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["283JZXPG6Q.com.codeglee.apps.Loyalty"],
+        "paths": [
+        	"/",
+        	"/account/register",
+        	"/account/connect",
+        	"/credit/add",
+        	"/credit/redeem"
+        ]
+      }
+    ]
+  }
+}
