@@ -11,6 +11,14 @@
         	"/credit/add",
         	"/credit/redeem"
         ]
+      },
+      {
+        "appIDs": ["DSR7RC6YG7.com.codeglee.apps.bujournal.development"],
+        "paths": ["/"]
+      },
+      {
+        "appIDs": ["DSR7RC6YG7.com.codeglee.apps.bujournal"],
+        "paths": ["/"]
       }
     ]
   }
